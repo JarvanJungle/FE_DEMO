@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useEffect, useRef, useState } from "react";
 import _ from "lodash";
 import Chart from "react-apexcharts";
 import {
@@ -8,7 +7,6 @@ import {
     Row,
     Button,
 } from "components";
-import { windows } from "@owczar/dashboard-style--airframe/js-modules/colors";
 const images = {
     'd01': require('./../../../images/demo/d01.jpg'),
     'm01': require('./../../../images/demo/m01.jpg'),
@@ -16,28 +14,57 @@ const images = {
     'm02': require('./../../../images/demo/m02.jpg'),
     'l01': require('./../../../images/demo/l01.jpg'),
 }
-const Element = (src, title) => {
-    return <>
-        <Col xs='4'>
-            {/* <img alt="dsdsd" src={src} style={{ width: '100%', aspectRatio: '1/1' }}></img> */}
-            <div style={{ width: '200px', height: '200px', backgroundColor: 'yellow', margin: 'auto', paddingTop: '100px' }}>{title}</div>
-        </Col>
-    </>
+const Element = (src, title, bottomTitle) => {
+    const blackWhiteImage = 'https://oss-uat.hypersms.vn/hypersms/20221016/db168aff773340b98259ca59157eaed8openAPI.jpg'
+    const fontSize = 20
+    const ref = useRef()
+    useEffect(() => {
+        let canvas = ref.current
+        let img = new Image()
+        img.src = blackWhiteImage
+        img.onload = () => {
+            // canvas.width = canvas.clientWidth
+            canvas.height = canvas.clientWidth
+            let ctx = canvas.getContext('2d');
+            // outside cover 
+            ctx.fillStyle = "yellow";
+            ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientWidth)
+            ctx.drawImage(img, 20, 20, canvas.clientWidth - 40, canvas.clientWidth - 40)
+            // title
+            const sentenceLength = title.length * fontSize
+            ctx.font = fontSize.toString() + "px Arial";
+            ctx.fillText(title, canvas.clientWidth / 2 - sentenceLength / 4, canvas.clientWidth / 2);
+            // bottom rectangle
+            const bottomSentenceLength = bottomTitle.length * fontSize
+            ctx.fillStyle = "red";
+            ctx.fillRect(canvas.clientWidth / 2 - bottomSentenceLength / 2, canvas.clientWidth / 2, bottomSentenceLength, 30)
+            // bottom title
+            ctx.font = fontSize.toString() + "px Arial";
+            ctx.fillStyle = "yellow";
+            ctx.fillText(bottomTitle, canvas.clientWidth / 2 - bottomSentenceLength / 4, canvas.clientWidth / 2 + fontSize);
 
+        }
+    }, [])
+    return <Col xs='4'>
+        <canvas ref={ref}></canvas>
+    </Col>
 }
 const ServiceCreate = (props) => {
     const elementList = [
         {
             title: 'BODY RECORD',
-            src: images.d01
+            src: images.d01,
+            bottomTitle: 'AAAAAAAAAA'
         },
         {
             title: 'MY EXERCISE',
-            src: images.l01
+            src: images.l01,
+            bottomTitle: 'BBBBBBBBB'
         },
         {
             title: 'MY DAIARY',
-            src: images.l03
+            src: images.l03,
+            bottomTitle: 'CCCCCCCCCC'
         }
     ]
     const charts = {
@@ -55,6 +82,9 @@ const ServiceCreate = (props) => {
             title: {
                 text: 'Body Record2021.05.21',
                 align: 'left'
+            },
+            markers: {
+                size: 5,
             }
         },
         series: [
@@ -72,7 +102,7 @@ const ServiceCreate = (props) => {
     return (
         <Container fluid style={{ textAlign: 'center', width: '80%' }}>
             <Row xs='12' style={{ paddingTop: '40px' }}>
-                {elementList.map(e => Element(e.src, e.title))}
+                {elementList.map(e => Element(e.src, e.title, e.bottomTitle))}
             </Row>
             <Row xs='12' style={{ paddingTop: '40px' }}>
                 <Col xs='12'>
